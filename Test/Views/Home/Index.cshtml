@@ -1,0 +1,72 @@
+﻿@{
+    ViewData["Title"] = "Website";
+}
+
+<div>
+    <b>Enter Here For Cryptocurrency Price Check:</b>
+    <input type="text" id="searchTerm" value="" />
+    <input type="button" value="Search" onclick="Search();" />
+</div>
+
+<div>
+    <ul id="searchResults" />
+</div>
+
+
+<script type="text/javascript">
+    var term = document.getElementById("searchTerm");
+    var list = document.getElementById("searchResults");
+
+    var uri = "wss://" + window.location.host + "/ws";
+    var webSocket;
+    initWebSocket();
+
+    function Search()
+    {
+        console.log("Button Pressed.")
+
+        if (webSocket === undefined)
+        {
+            initWebSocket();
+        }
+
+        webSocket.send(term.value);
+    }
+
+    function initWebSocket()
+    {
+        webSocket = new WebSocket(uri);
+
+        //Open connection handler.
+        webSocket.onopen = function()
+        {
+            console.log("WebSocket Opened.");
+
+            if (term.value != "")
+            {
+                webSocket.send(term.value);
+            }
+            
+        };
+
+        //Message data handler.
+        webSocket.onmessage = function (e)
+        {
+            var item = document.createElement("li");
+            item.appendChild(document.createTextNode(e.data))
+            list.appendChild(item);
+        };
+
+        //Close event handler.
+        webSocket.onclose = function ()
+        {
+            console.log("WebSocket Closed.");
+        };
+
+        //Error event handler.
+        webSocket.onerror = function (e)
+        {
+            console.log(e.message);
+        }
+    }
+</script>
